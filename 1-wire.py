@@ -1,9 +1,10 @@
-import os
+import os, sys
 import glob
 import time
 import logging
 import yaml
 import psycopg2
+import datetime
  
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -51,21 +52,27 @@ try:
         # create a psycopg2 cursor that can execute queries
         cursor = conn.cursor()
 
-        # create a new table with a single column called "name"
-        # cursor.execute("""CREATE TABLE tutorials (name char(40));""")
-
-        # run a SELECT statement - no data in there, but we can try it
-        # cursor.execute("""SELECT * from weatherdata""")
-        # rows = cursor.fetchall()
-        # print("fetch all: " + str(rows))
 except Exception as e:
         print("Uh oh, can't connect. Invalid dbname, user or password?")
         print(e)
-
+        sys.exit()
 
 
 
 
 while True:
-	print("Temp (C,F): " + str(read_temp()))	
-	time.sleep(1)
+  temps = read_temp()
+  print("Temp (C,F): " + str(temps))	
+  sql = """INSERT into fishtanksensordata (measurement_timestamp,temperature_degf) values (%s,%s)"""
+  s = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+  timestamp =  s[:-3]
+  logging.debug("Timestamp, Data: " + str(timestamp) + ", " + str(temps[1]))
+  try:
+    cursor.execute(sql, (timestamp, temps[1]))
+    conn.commit()
+  except (Exception, psycopg2.DatabaseError) as error:
+    print(error)
+    print("SQL statement:" + sql)
+    print("Data: " + str(temps))
+    conn.rollback()
+  time.sleep(4)
