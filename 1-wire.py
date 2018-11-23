@@ -2,7 +2,8 @@ import os
 import glob
 import time
 import logging
-
+import yaml
+import psycopg2
  
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -15,8 +16,6 @@ device_file = device_folder + '/w1_slave'
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
-dbuser = ''
-dbpass = ''
 
 def read_temp_raw():
     f = open(device_file, 'r')
@@ -36,16 +35,37 @@ def read_temp():
         temp_f = temp_c * 9.0 / 5.0 + 32.0
         return temp_c, temp_f
 
-with open('passwordfile.txt') as f:
-    credentials = [x.strip().split(':') for x in f.readlines()]
-
-for username,password in credentials:
-   dbuser = username
-   dbpass = password
-   break 
 	
 
-logging.debug("DB User/pass" + dbuser + "/" + dbpass )
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+logging.debug("DB User  " +  cfg['postgres']['user'] )
+
+try:
+        connect_str = "dbname='"+ cfg['postgres']['dbname'] +"' user='"+ cfg['postgres']['user'] +"' " + \
+                  "host='"+ cfg['postgres']['host'] +"' password='"+ cfg['postgres']['password'] +"'"
+        # use our connection values to establish a connection
+        conn = psycopg2.connect(connect_str)
+
+        # create a psycopg2 cursor that can execute queries
+        cursor = conn.cursor()
+
+        # create a new table with a single column called "name"
+        # cursor.execute("""CREATE TABLE tutorials (name char(40));""")
+
+        # run a SELECT statement - no data in there, but we can try it
+        # cursor.execute("""SELECT * from weatherdata""")
+        # rows = cursor.fetchall()
+        # print("fetch all: " + str(rows))
+except Exception as e:
+        print("Uh oh, can't connect. Invalid dbname, user or password?")
+        print(e)
+
+
+
+
+
 while True:
 	print("Temp (C,F): " + str(read_temp()))	
 	time.sleep(1)

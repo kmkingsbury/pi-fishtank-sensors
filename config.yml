@@ -1,0 +1,5 @@
+postgres:
+    host: localhost
+    user: root
+    password: my secret password
+    dbname: write-math
