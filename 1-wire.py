@@ -5,7 +5,7 @@ import logging
 import yaml
 import psycopg2
 import datetime
- 
+
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
  
@@ -43,6 +43,14 @@ with open("config.yml", 'r') as ymlfile:
 
 logging.debug("DB User  " +  cfg['postgres']['user'] )
 
+# Setup MQTT
+client = ''
+if cfg['mqtt']['enabled'] == True:
+   import paho.mqtt.client as mqtt
+   client = mqtt.Client("P1") #create new instance
+   client.connect(cfg['mqtt']['host']) #connect to broker
+
+
 try:
         connect_str = "dbname='"+ cfg['postgres']['dbname'] +"' user='"+ cfg['postgres']['user'] +"' " + \
                   "host='"+ cfg['postgres']['host'] +"' password='"+ cfg['postgres']['password'] +"'"
@@ -75,4 +83,6 @@ while True:
     print("SQL statement:" + sql)
     print("Data: " + str(temps))
     conn.rollback()
+  if cfg['mqtt']['enabled'] == True:
+    client.publish(cfg['mqtt']['topic'],  '{ "koi_temperature":"' + str(temps[1]) + '" }') # publish to mqtt
   time.sleep(4)

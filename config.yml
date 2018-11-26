@@ -3,3 +3,7 @@ postgres:
     user: root
     password: my secret password
     dbname: write-math
+mqtt:
+    enabled: false
+    host: somehost
+    topic: "topic/fishtank"
