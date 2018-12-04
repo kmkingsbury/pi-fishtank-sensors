@@ -36,6 +36,11 @@ def read_temp():
         temp_f = temp_c * 9.0 / 5.0 + 32.0
         return temp_c, temp_f
 
+def writePidFile():
+    pid = str(os.getpid())
+    currentFile = open('/tmp/1-wire.pid', 'w')
+    currentFile.write(pid)
+    currentFile.close()
 	
 errorcount = 0
 
@@ -68,7 +73,7 @@ except Exception as e:
 
 
 
-
+writePidFile()
 while True:
   temps = read_temp()
   print("Temp (C,F): " + str(temps))	
