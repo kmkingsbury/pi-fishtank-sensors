@@ -37,6 +37,7 @@ def read_temp():
         return temp_c, temp_f
 
 	
+errorcount = 0
 
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
@@ -78,11 +79,15 @@ while True:
   try:
     cursor.execute(sql, (timestamp, temps[1]))
     conn.commit()
+    errorcount = 0
   except (Exception, psycopg2.DatabaseError) as error:
     print(error)
     print("SQL statement:" + sql)
     print("Data: " + str(temps))
-    conn.rollback()
+    #conn.rollback()
+    errorcount = errorcount + 1
+    if (errorcount > 5):
+       sys.exit()
   if cfg['mqtt']['enabled'] == True:
     client.publish(cfg['mqtt']['topic'],  '{ "koi_temperature":"' + str(temps[1]) + '" }') # publish to mqtt
   time.sleep(4)
