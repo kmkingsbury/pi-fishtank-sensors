@@ -3,7 +3,6 @@ import glob
 import time
 import logging
 import yaml
-import psycopg2
 import datetime
 
 os.system('modprobe w1-gpio')
@@ -47,8 +46,6 @@ errorcount = 0
 with open("config.yml", 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
-logging.debug("DB User  " +  cfg['postgres']['user'] )
-
 # Setup MQTT
 client = ''
 if cfg['mqtt']['enabled'] == True:
@@ -58,42 +55,13 @@ if cfg['mqtt']['enabled'] == True:
    # Loop start: These functions implement a threaded interface to the network loop. Calling loop_start() once, before or after connect*(), runs a thread in the background to call loop() automatically. This frees up the main thread for other work that may be blocking.
    client.loop_start()
 
-try:
-        connect_str = "dbname='"+ cfg['postgres']['dbname'] +"' user='"+ cfg['postgres']['user'] +"' " + \
-                  "host='"+ cfg['postgres']['host'] +"' password='"+ cfg['postgres']['password'] +"'"
-        # use our connection values to establish a connection
-        conn = psycopg2.connect(connect_str)
-
-        # create a psycopg2 cursor that can execute queries
-        cursor = conn.cursor()
-
-except Exception as e:
-        print("Uh oh, can't connect. Invalid dbname, user or password?")
-        print(e)
-        sys.exit()
-
-
-
 writePidFile()
 while True:
   temps = read_temp()
   print("Temp (C,F): " + str(temps))	
-  sql = """INSERT into fishtanksensordata (measurement_timestamp,temperature_degf) values (%s,%s)"""
   s = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
   timestamp =  s[:-3]
   logging.debug("Timestamp, Data: " + str(timestamp) + ", " + str(temps[1]))
-  try:
-    cursor.execute(sql, (timestamp, temps[1]))
-    conn.commit()
-    errorcount = 0
-  except (Exception, psycopg2.DatabaseError) as error:
-    print(error)
-    print("SQL statement:" + sql)
-    print("Data: " + str(temps))
-    #conn.rollback()
-    errorcount = errorcount + 1
-    if (errorcount > 5):
-       sys.exit()
   if cfg['mqtt']['enabled'] == True:
     client.publish(cfg['mqtt']['topic'],  '{ "koi_temperature":"' + str(temps[1]) + '", "datetime":"' + str(timestamp) + '" }') # publish to mqtt
   time.sleep(4)
