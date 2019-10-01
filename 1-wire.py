@@ -55,7 +55,8 @@ if cfg['mqtt']['enabled'] == True:
    import paho.mqtt.client as mqtt
    client = mqtt.Client("P1") #create new instance
    client.connect(cfg['mqtt']['host']) #connect to broker
-
+   # Loop start: These functions implement a threaded interface to the network loop. Calling loop_start() once, before or after connect*(), runs a thread in the background to call loop() automatically. This frees up the main thread for other work that may be blocking.
+   client.loop_start()
 
 try:
         connect_str = "dbname='"+ cfg['postgres']['dbname'] +"' user='"+ cfg['postgres']['user'] +"' " + \
@@ -94,5 +95,5 @@ while True:
     if (errorcount > 5):
        sys.exit()
   if cfg['mqtt']['enabled'] == True:
-    client.publish(cfg['mqtt']['topic'],  '{ "koi_temperature":"' + str(temps[1]) + '" }') # publish to mqtt
+    client.publish(cfg['mqtt']['topic'],  '{ "koi_temperature":"' + str(temps[1]) + '", "datetime":"' + str(timestamp) + '" }') # publish to mqtt
   time.sleep(4)
