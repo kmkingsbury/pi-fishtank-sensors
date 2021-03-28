@@ -19,6 +19,9 @@ Near/At the bottom add/edit the dtoverlay line.
 ``` 
 dtoverlay=w1-gpio,gpiopin=17
 ```
+## Python Modules
+pip install pyyaml
+pip install paho-mqtt
 
 
 ## Files
