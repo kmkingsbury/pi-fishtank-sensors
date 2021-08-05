@@ -19,10 +19,25 @@ Near/At the bottom add/edit the dtoverlay line.
 ``` 
 dtoverlay=w1-gpio,gpiopin=17
 ```
+```
+ls -l /sys/devices/w1_bus_master1/
+28-01192fb741a8
+```
+```
+cat /sys/devices/w1_bus_master1/28-01192fb741a8/w1_slave 
+28 01 4b 46 7f ff 0c 10 77 : crc=77 YES
+28 01 4b 46 7f ff 0c 10 77 t=18500
+```
+temperature is 18.500˚C.
+
+
+
 ## Python Modules
 pip install pyyaml
 pip install paho-mqtt
 
+pip install influxdb-client
+pip install influxdb
 
 ## Files
 Name | Description

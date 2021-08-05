@@ -1,6 +1,8 @@
-check process 1-wire with pidfile /tmp/1-wire.pid
-   start = "/bin/su - pi -c 'cd /home/pi/Code/pi-fishtank-sensors; /usr/bin/python3 1-wire.py  >> /tmp/fishtank.log 2>&1 &'"
-   stop = "/usr/bin/killall python3"
-check process writepostgres with pidfile /tmp/writepostgres.pid
-   start = "/bin/su - pi -c 'cd /home/pi/Code/pi-fishtank-sensors; /usr/bin/python3 writepostgres.py  >> /tmp/writepostgres.log 2>&1 &'"
-   stop = "/usr/bin/killall python3"
+check process fishtank-sensors with pidfile /tmp/1-wire.pid
+   start = "/bin/su - pi -c 'cd /home/pi/Code/pi-fishtank-sensors; source /home/pi/Code/pi-fishtank-sensors/fish-env/bin/activate; /home/pi/Code/pi-fishtank-sensors/fish-env/bin/python3 fishtank-sensors.py  >> /tmp/fishtank.log 2>&1 &'"
+   stop = "pkill -f '/home/pi/Code/pi-fishtank-sensors/fish-env/bin/python3 fishtank-sensors.py'"
+
+check process writeinfluxdb with pidfile /tmp/writeinfluxdb.pid
+   start = "/bin/su - pi -c 'cd /home/pi/Code/pi-fishtank-sensors; source /home/pi/Code/pi-fishtank-sensors/fish-env/bin/activate; /home/pi/Code/pi-fishtank-sensors/fish-env/bin/python3 writeinfluxdb.py  >> /tmp/writeinfluxdb.log 2>&1 &'"
+   stop = "pkill -f '/home/pi/Code/pi-fishtank-sensors/fish-env/bin/python3 writeinfluxdb.py'"
+
