@@ -5,6 +5,8 @@ import logging
 import yaml
 import datetime
 from gpiozero import DistanceSensor
+#from gpiozero.pins.pigpio import PiGPIOFactory
+
 
 
 # Pull in 1 Wire capablities
@@ -27,6 +29,11 @@ sleeptime = 5.0
 # Pins for the sensor.
 echo_pin = 23
 trigger_pin = 24
+
+# Switch from default to potentially more accurate readings.
+# factory = PiGPIOFactory()
+# need pigpio daemon:
+# sudo pigpiod
 
 # Create empty list-type variable so we can
 # store measurements
@@ -120,7 +127,7 @@ if cfg['mqtt']['enabled'] is True:
     client.loop_start()
 
 writePidFile()
-dist_sensor = DistanceSensor(echo=echo_pin, trigger=trigger_pin)
+dist_sensor = DistanceSensor(echo=echo_pin, trigger=trigger_pin) #, pin_factory=factory)
 starttime = time.time()
 while True:
     # 1 -wire read:
