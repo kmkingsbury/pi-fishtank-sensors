@@ -1,3 +1,7 @@
+check process pigpiod matching pigpiod
+    start = "/usr/bin/pigpiod"
+    stop = "kill pigpiod"
+
 check process fishtank-sensors with pidfile /tmp/1-wire.pid
    start = "/bin/su - pi -c 'cd /home/pi/Code/pi-fishtank-sensors; source /home/pi/Code/pi-fishtank-sensors/fish-env/bin/activate; /home/pi/Code/pi-fishtank-sensors/fish-env/bin/python3 fishtank-sensors.py  >> /tmp/fishtank.log 2>&1 &'"
    stop = "pkill -f '/home/pi/Code/pi-fishtank-sensors/fish-env/bin/python3 fishtank-sensors.py'"
