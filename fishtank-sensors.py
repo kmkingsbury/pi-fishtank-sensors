@@ -5,8 +5,7 @@ import logging
 import yaml
 import datetime
 from gpiozero import DistanceSensor
-#from gpiozero.pins.pigpio import PiGPIOFactory
-
+# from gpiozero.pins.pigpio import PiGPIOFactory
 
 
 # Pull in 1 Wire capablities
@@ -39,12 +38,17 @@ trigger_pin = 24
 # store measurements
 sensor_measurements = []
 
+# For the Distance Sensor
 # Declare these variables at a top level so you can
 # easily edit them once for your whole script to
 # test performance
 upper_reasonable_bound = 200
 lower_reasonable_bound = 0
 rolling_average_size = 10
+
+# Limits for temperature sensor
+temp_low = 25
+temp_high = 95
 
 
 # 1-wire read
@@ -70,6 +74,10 @@ def read_temp():
         temp_string = lines[1][equals_pos+2:]
         temp_c = float(temp_string) / 1000.0
         temp_f = temp_c * 9.0 / 5.0 + 32.0
+
+        # Check that temperature is within limits.
+        if temp_f > temp_high or temp_f < temp_low: 
+            return None, None
         return temp_c, temp_f
 
 
@@ -127,7 +135,7 @@ if cfg['mqtt']['enabled'] is True:
     client.loop_start()
 
 writePidFile()
-dist_sensor = DistanceSensor(echo=echo_pin, trigger=trigger_pin) #, pin_factory=factory)
+dist_sensor = DistanceSensor(echo=echo_pin, trigger=trigger_pin)  #, pin_factory=factory)
 starttime = time.time()
 while True:
     # 1 -wire read:
